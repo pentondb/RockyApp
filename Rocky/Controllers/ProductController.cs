@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Rocky.Data;
 using Rocky.Models;
 using System;
@@ -22,7 +23,7 @@ namespace Rocky.Controllers
         {
             IEnumerable<Product> objList = _db.Product;
 
-            foreach(var obj in objList)
+            foreach (var obj in objList)
             {
                 obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId);
             };
@@ -30,11 +31,35 @@ namespace Rocky.Controllers
             return View(objList);
         }
 
-        // GET for Create
+        // GET for UPSERT
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult Upsert(int? id)
         {
-            return View();
+            IEnumerable<SelectListItem> CategoryDropDown = _db.Category.Select(i => new SelectListItem
+            {
+                Text = i.Name,
+                Value = i.Id.ToString()
+            });
+
+            ViewBag.CategoryDropDown = CategoryDropDown;
+            //ViewData["CategoryDropDown"] = CategoryDropDown;
+
+            Product product = new Product();
+            if (id == null)
+            {
+                // This is for create
+                return View(product);
+            }
+            else
+            {
+                // This is for update
+                product = _db.Product.Find(id);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+                return View(product);
+            }
         }
 
         [HttpPost]
