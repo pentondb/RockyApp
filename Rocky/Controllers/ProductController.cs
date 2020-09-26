@@ -19,7 +19,7 @@ namespace Rocky.Controllers
         private readonly ApplicationDbContext _db;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProductController(ApplicationDbContext db,IWebHostEnvironment webHostEnvironment)
+        public ProductController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment)
         {
             _db = db;
             _webHostEnvironment = webHostEnvironment;
@@ -95,7 +95,7 @@ namespace Rocky.Controllers
                     string fileName = Guid.NewGuid().ToString();
                     string extension = Path.GetExtension(files[0].FileName);
 
-                    using(var fileStream = new FileStream(Path.Combine(upload,fileName+extension), FileMode.Create))
+                    using (var fileStream = new FileStream(Path.Combine(upload, fileName + extension), FileMode.Create))
                     {
                         files[0].CopyTo(fileStream);
                     }
@@ -140,6 +140,11 @@ namespace Rocky.Controllers
                 _db.SaveChanges();
                 return RedirectToAction("Index");
             }
+            productVM.CategorySelectList = _db.Category.Select(i => new SelectListItem
+            {
+                Text = i.Name,
+                Value = i.Id.ToString()
+            });
             return View(productVM);
         }
 
@@ -150,15 +155,17 @@ namespace Rocky.Controllers
             {
                 return NotFound();
             }
-            var obj = _db.Product.Find(id);
-            if (obj == null)
+            var product = _db.Product.Include("Category").FirstOrDefault(u => u.Id == id);
+            //Product product = _db.Product.Find(id);
+            //product.Category = _db.Category.Find(product.CategoryId);
+            if (product == null)
             {
                 return NotFound();
             }
-            return View(obj);
+            return View(product);
         }
 
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeletePost(int? id)
         {
@@ -167,6 +174,16 @@ namespace Rocky.Controllers
             {
                 return NotFound();
             }
+
+            string webRootPath = _webHostEnvironment.WebRootPath;
+            string upload = webRootPath + WC.ImagePath;
+            string oldFile = Path.Combine(upload, obj.Image);
+
+            if (System.IO.File.Exists(oldFile))
+            {
+                System.IO.File.Delete(oldFile);
+            }
+
             _db.Product.Remove(obj);
             _db.SaveChanges();
             return RedirectToAction("Index");
