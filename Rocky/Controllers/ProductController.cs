@@ -38,6 +38,17 @@ namespace Rocky.Controllers
             return View(objList);
         }
 
+        public IActionResult Details(int id)
+        {
+            DetailsVM detailsVM = new DetailsVM()
+            {
+                Product = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType)
+                .Where(u => u.Id == id).FirstOrDefault(),
+                ExistsInCart = false
+            };
+            return View(detailsVM);
+        }
+
         // GET for UPSERT
         [HttpGet]
         public IActionResult Upsert(int? id)
