@@ -29,8 +29,8 @@ namespace Rocky.Controllers
             {
                 Products = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType),
                 Categories = _db.Category
-            
-            }
+
+            };
             return View(homeVM);
         }
 
