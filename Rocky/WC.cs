@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 
 namespace Rocky
 {
+    /* WC == Web Constant, globally available constants to avoid 'magic strings' */
     public static class WC
     {
         public static string ImagePath = @"\images\product\";
+        public static string SessionCart = "ShoppingCartSession";
     }
 }
