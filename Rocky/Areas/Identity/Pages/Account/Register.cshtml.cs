@@ -74,7 +74,7 @@ namespace Rocky.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            if(!await _roleManager.RoleExistsAsync(WC.AdminRole))
+            if (!await _roleManager.RoleExistsAsync(WC.AdminRole))
             {
                 await _roleManager.CreateAsync(new IdentityRole(WC.AdminRole));
                 await _roleManager.CreateAsync(new IdentityRole(WC.CustomerRole));
@@ -90,12 +90,25 @@ namespace Rocky.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, 
-                    PhoneNumber = Input.PhoneNumber, FullName = Input.FullName};
+                var user = new ApplicationUser
+                {
+                    UserName = Input.Email,
+                    Email = Input.Email,
+                    PhoneNumber = Input.PhoneNumber,
+                    FullName = Input.FullName
+                };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, WC.AdminRole);
+                    if (User.IsInRole(WC.AdminRole))
+                    {
+                        // An Admin user has logged in and they try to register a new user
+                        await _userManager.AddToRoleAsync(user, WC.AdminRole);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, WC.CustomerRole);
+                    }
                     _logger.LogInformation("User created a new account with password.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
