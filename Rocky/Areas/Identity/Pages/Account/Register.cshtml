@@ -42,7 +42,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Input.ConfirmPassword"></label>
-                <input asp-for="Input.Password" class="form-control" />
+                <input asp-for="Input.ConfirmPassword" class="form-control" />
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             @if (User.IsInRole(Rocky.WC.AdminRole))
